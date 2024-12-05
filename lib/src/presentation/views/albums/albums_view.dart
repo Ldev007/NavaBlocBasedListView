@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:navalistview/src/presentation/views/albums/components/album_card.dart';
 import 'package:navalistview/src/presentation/common_components/shimmers/album_card_shimmer.dart';
 import 'package:navalistview/src/presentation/controller_cubits/albums_view_controller_cubit.dart';
-import 'package:navalistview/src/presentation/controller_cubits/states/home_states.dart';
+import 'package:navalistview/src/presentation/controller_cubits/states/albums_view_states.dart';
+import 'package:navalistview/src/presentation/views/albums/components/album_card.dart';
+import 'package:navalistview/src/presentation/views/albums/components/more_albums_loading_indicator.dart';
 
 class AlbumsView extends StatefulWidget {
   const AlbumsView({super.key});
@@ -19,7 +20,9 @@ class _AlbumsViewState extends State<AlbumsView> {
   void initState() {
     context.read<AlbumsViewControllerCubit>().fetchAlbums();
     _controller.addListener(() {
-      if (_controller.position.pixels > _controller.position.maxScrollExtent) {
+      if (_controller.position.pixels > _controller.position.maxScrollExtent - 200 &&
+          context.read<AlbumsViewControllerCubit>().state is! AlbumsViewInitLoading &&
+          context.read<AlbumsViewControllerCubit>().state is! AlbumsViewLoadedLoading) {
         context.read<AlbumsViewControllerCubit>().fetchAlbums();
       }
     });
@@ -38,26 +41,40 @@ class _AlbumsViewState extends State<AlbumsView> {
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       ),
       body: SafeArea(
-        child: BlocBuilder<AlbumsViewControllerCubit, HomeState>(
-          builder: (ctx, state) {
-            if (state is HomeLoading) {
-              return ListView(
-                children: List.generate(
-                  (MediaQuery.of(context).size.height) ~/ (MediaQuery.of(context).size.height * 0.2),
-                  (i) => const AlbumCardShimmer(),
-                ),
-              );
-            }
-            if (state is HomeLoaded) {
-              return ListView.builder(
-                controller: _controller,
-                itemCount: state.albums.length,
-                itemBuilder: (ctx, i) => const AlbumCard(),
-              );
-            } else {
-              return const Placeholder();
-            }
-          },
+        child: RefreshIndicator(
+          onRefresh: () => context.read<AlbumsViewControllerCubit>().refreshAlbums(),
+          child: BlocBuilder<AlbumsViewControllerCubit, AlbumsViewState>(
+            builder: (ctx, state) {
+              if (state is AlbumsViewInitLoading) {
+                return ListView(
+                  children: List.generate(
+                    (MediaQuery.of(context).size.height) ~/ (MediaQuery.of(context).size.height * 0.2),
+                    (i) => const AlbumCardShimmer(),
+                  ),
+                );
+              }
+              if (state is AlbumsViewLoadedLoading) {
+                return ListView.separated(
+                  controller: _controller,
+                  itemCount: state.albums.length + 1,
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                  itemBuilder: (ctx, i) => i == state.albums.length ? const MoreAlbumsLoadingIndicator() : AlbumCard(album: state.albums[i]),
+                  separatorBuilder: (context, index) => const SizedBox(height: 10),
+                );
+              }
+              if (state is AlbumsViewLoaded) {
+                return ListView.separated(
+                  controller: _controller,
+                  itemCount: state.albums.length,
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                  itemBuilder: (ctx, i) => AlbumCard(album: state.albums[i]),
+                  separatorBuilder: (context, index) => const SizedBox(height: 10),
+                );
+              } else {
+                return const Placeholder();
+              }
+            },
+          ),
         ),
       ),
     );

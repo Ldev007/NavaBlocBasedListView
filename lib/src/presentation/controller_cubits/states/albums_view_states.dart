@@ -1,13 +1,19 @@
-import 'package:navalistview/src/presentation/views/albums/components/album_card.dart';
+import 'package:navalistview/src/domain/models/album.dart';
 
 class AlbumsViewState {}
 
 class AlbumsViewInit extends AlbumsViewState {}
 
-class AlbumsViewLoading extends AlbumsViewState {}
+class AlbumsViewInitLoading extends AlbumsViewState {}
+
+class AlbumsViewLoadedLoading extends AlbumsViewState {
+  final List<Album> albums;
+
+  AlbumsViewLoadedLoading({required this.albums});
+}
 
 class AlbumsViewLoaded extends AlbumsViewState {
-  final List<AlbumCard> albums;
+  final List<Album> albums;
 
   AlbumsViewLoaded({required this.albums});
 }
