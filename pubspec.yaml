@@ -1,0 +1,23 @@
+name: navalistview
+description: "A simple infinitely scrollable list view made for Navatech AI as part of the ongoing hiring process for the role Lead Flutter Developer"
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  cupertino_icons: ^1.0.8
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  change_app_package_name: ^1.4.0
+  flutter_lints: ^4.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
