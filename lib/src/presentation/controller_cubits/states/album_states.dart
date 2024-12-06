@@ -4,19 +4,7 @@ class AlbumState {}
 
 class AlbumInit extends AlbumState {}
 
-class AlbumInitLoading extends AlbumState {}
-
-class AlbumLoadedLoading extends AlbumState {
-  final List<Photo> photos;
-
-  AlbumLoadedLoading({required this.photos});
-}
-
-class AlbumLoaded extends AlbumState {
-  final List<Photo> photos;
-
-  AlbumLoaded({required this.photos});
-}
+class AlbumInitFetching extends AlbumState {}
 
 class AlbumError extends AlbumState {
   final String message;

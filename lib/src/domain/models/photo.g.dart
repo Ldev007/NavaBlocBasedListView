@@ -22,18 +22,23 @@ const PhotoSchema = CollectionSchema(
       name: r'albumId',
       type: IsarType.long,
     ),
-    r'thumbnailUrl': PropertySchema(
+    r'photoId': PropertySchema(
       id: 1,
+      name: r'photoId',
+      type: IsarType.long,
+    ),
+    r'thumbnailUrl': PropertySchema(
+      id: 2,
       name: r'thumbnailUrl',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'title',
       type: IsarType.string,
     ),
     r'url': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'url',
       type: IsarType.string,
     )
@@ -43,7 +48,21 @@ const PhotoSchema = CollectionSchema(
   deserialize: _photoDeserialize,
   deserializeProp: _photoDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'photoId': IndexSchema(
+      id: -1877533456151046685,
+      name: r'photoId',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'photoId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _photoGetId,
@@ -71,9 +90,10 @@ void _photoSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.albumId);
-  writer.writeString(offsets[1], object.thumbnailUrl);
-  writer.writeString(offsets[2], object.title);
-  writer.writeString(offsets[3], object.url);
+  writer.writeLong(offsets[1], object.photoId);
+  writer.writeString(offsets[2], object.thumbnailUrl);
+  writer.writeString(offsets[3], object.title);
+  writer.writeString(offsets[4], object.url);
 }
 
 Photo _photoDeserialize(
@@ -84,11 +104,12 @@ Photo _photoDeserialize(
 ) {
   final object = Photo(
     albumId: reader.readLong(offsets[0]),
-    id: id,
-    thumbnailUrl: reader.readString(offsets[1]),
-    title: reader.readString(offsets[2]),
-    url: reader.readString(offsets[3]),
+    photoId: reader.readLong(offsets[1]),
+    thumbnailUrl: reader.readString(offsets[2]),
+    title: reader.readString(offsets[3]),
+    url: reader.readString(offsets[4]),
   );
+  object.id = id;
   return object;
 }
 
@@ -102,10 +123,12 @@ P _photoDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -113,19 +136,83 @@ P _photoDeserializeProp<P>(
 }
 
 Id _photoGetId(Photo object) {
-  return object.id ?? Isar.autoIncrement;
+  return object.id;
 }
 
 List<IsarLinkBase<dynamic>> _photoGetLinks(Photo object) {
   return [];
 }
 
-void _photoAttach(IsarCollection<dynamic> col, Id id, Photo object) {}
+void _photoAttach(IsarCollection<dynamic> col, Id id, Photo object) {
+  object.id = id;
+}
+
+extension PhotoByIndex on IsarCollection<Photo> {
+  Future<Photo?> getByPhotoId(int photoId) {
+    return getByIndex(r'photoId', [photoId]);
+  }
+
+  Photo? getByPhotoIdSync(int photoId) {
+    return getByIndexSync(r'photoId', [photoId]);
+  }
+
+  Future<bool> deleteByPhotoId(int photoId) {
+    return deleteByIndex(r'photoId', [photoId]);
+  }
+
+  bool deleteByPhotoIdSync(int photoId) {
+    return deleteByIndexSync(r'photoId', [photoId]);
+  }
+
+  Future<List<Photo?>> getAllByPhotoId(List<int> photoIdValues) {
+    final values = photoIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'photoId', values);
+  }
+
+  List<Photo?> getAllByPhotoIdSync(List<int> photoIdValues) {
+    final values = photoIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'photoId', values);
+  }
+
+  Future<int> deleteAllByPhotoId(List<int> photoIdValues) {
+    final values = photoIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'photoId', values);
+  }
+
+  int deleteAllByPhotoIdSync(List<int> photoIdValues) {
+    final values = photoIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'photoId', values);
+  }
+
+  Future<Id> putByPhotoId(Photo object) {
+    return putByIndex(r'photoId', object);
+  }
+
+  Id putByPhotoIdSync(Photo object, {bool saveLinks = true}) {
+    return putByIndexSync(r'photoId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByPhotoId(List<Photo> objects) {
+    return putAllByIndex(r'photoId', objects);
+  }
+
+  List<Id> putAllByPhotoIdSync(List<Photo> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'photoId', objects, saveLinks: saveLinks);
+  }
+}
 
 extension PhotoQueryWhereSort on QueryBuilder<Photo, Photo, QWhere> {
   QueryBuilder<Photo, Photo, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterWhere> anyPhotoId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'photoId'),
+      );
     });
   }
 }
@@ -195,6 +282,94 @@ extension PhotoQueryWhere on QueryBuilder<Photo, Photo, QWhereClause> {
       ));
     });
   }
+
+  QueryBuilder<Photo, Photo, QAfterWhereClause> photoIdEqualTo(int photoId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'photoId',
+        value: [photoId],
+      ));
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterWhereClause> photoIdNotEqualTo(int photoId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'photoId',
+              lower: [],
+              upper: [photoId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'photoId',
+              lower: [photoId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'photoId',
+              lower: [photoId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'photoId',
+              lower: [],
+              upper: [photoId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterWhereClause> photoIdGreaterThan(
+    int photoId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'photoId',
+        lower: [photoId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterWhereClause> photoIdLessThan(
+    int photoId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'photoId',
+        lower: [],
+        upper: [photoId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterWhereClause> photoIdBetween(
+    int lowerPhotoId,
+    int upperPhotoId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'photoId',
+        lower: [lowerPhotoId],
+        includeLower: includeLower,
+        upper: [upperPhotoId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension PhotoQueryFilter on QueryBuilder<Photo, Photo, QFilterCondition> {
@@ -250,23 +425,7 @@ extension PhotoQueryFilter on QueryBuilder<Photo, Photo, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Photo, Photo, QAfterFilterCondition> idIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'id',
-      ));
-    });
-  }
-
-  QueryBuilder<Photo, Photo, QAfterFilterCondition> idIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'id',
-      ));
-    });
-  }
-
-  QueryBuilder<Photo, Photo, QAfterFilterCondition> idEqualTo(Id? value) {
+  QueryBuilder<Photo, Photo, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
@@ -276,7 +435,7 @@ extension PhotoQueryFilter on QueryBuilder<Photo, Photo, QFilterCondition> {
   }
 
   QueryBuilder<Photo, Photo, QAfterFilterCondition> idGreaterThan(
-    Id? value, {
+    Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -289,7 +448,7 @@ extension PhotoQueryFilter on QueryBuilder<Photo, Photo, QFilterCondition> {
   }
 
   QueryBuilder<Photo, Photo, QAfterFilterCondition> idLessThan(
-    Id? value, {
+    Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -302,14 +461,66 @@ extension PhotoQueryFilter on QueryBuilder<Photo, Photo, QFilterCondition> {
   }
 
   QueryBuilder<Photo, Photo, QAfterFilterCondition> idBetween(
-    Id? lower,
-    Id? upper, {
+    Id lower,
+    Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterFilterCondition> photoIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'photoId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterFilterCondition> photoIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'photoId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterFilterCondition> photoIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'photoId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterFilterCondition> photoIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'photoId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -722,6 +933,18 @@ extension PhotoQuerySortBy on QueryBuilder<Photo, Photo, QSortBy> {
     });
   }
 
+  QueryBuilder<Photo, Photo, QAfterSortBy> sortByPhotoId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterSortBy> sortByPhotoIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Photo, Photo, QAfterSortBy> sortByThumbnailUrl() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'thumbnailUrl', Sort.asc);
@@ -784,6 +1007,18 @@ extension PhotoQuerySortThenBy on QueryBuilder<Photo, Photo, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Photo, Photo, QAfterSortBy> thenByPhotoId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Photo, Photo, QAfterSortBy> thenByPhotoIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Photo, Photo, QAfterSortBy> thenByThumbnailUrl() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'thumbnailUrl', Sort.asc);
@@ -828,6 +1063,12 @@ extension PhotoQueryWhereDistinct on QueryBuilder<Photo, Photo, QDistinct> {
     });
   }
 
+  QueryBuilder<Photo, Photo, QDistinct> distinctByPhotoId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'photoId');
+    });
+  }
+
   QueryBuilder<Photo, Photo, QDistinct> distinctByThumbnailUrl(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -863,6 +1104,12 @@ extension PhotoQueryProperty on QueryBuilder<Photo, Photo, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Photo, int, QQueryOperations> photoIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'photoId');
+    });
+  }
+
   QueryBuilder<Photo, String, QQueryOperations> thumbnailUrlProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'thumbnailUrl');
@@ -888,7 +1135,7 @@ extension PhotoQueryProperty on QueryBuilder<Photo, Photo, QQueryProperty> {
 
 Photo _$PhotoFromJson(Map<String, dynamic> json) => Photo(
       albumId: (json['albumId'] as num).toInt(),
-      id: (json['id'] as num?)?.toInt(),
+      photoId: (json['id'] as num).toInt(),
       title: json['title'] as String,
       url: json['url'] as String,
       thumbnailUrl: json['thumbnailUrl'] as String,
@@ -896,7 +1143,7 @@ Photo _$PhotoFromJson(Map<String, dynamic> json) => Photo(
 
 Map<String, dynamic> _$PhotoToJson(Photo instance) => <String, dynamic>{
       'albumId': instance.albumId,
-      'id': instance.id,
+      'id': instance.photoId,
       'title': instance.title,
       'url': instance.url,
       'thumbnailUrl': instance.thumbnailUrl,

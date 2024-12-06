@@ -4,18 +4,22 @@ import 'package:json_annotation/json_annotation.dart';
 part 'photo.g.dart';
 
 @JsonSerializable()
-@Collection()
+@collection
 @Name('Photos')
 class Photo {
   final int albumId;
-  final Id? id;
+  @JsonKey(includeFromJson: false, includeToJson: false, includeIfNull: false)
+  Id id = Isar.autoIncrement;
+
+  @JsonKey(name: 'id')
+  final int photoId;
   final String title;
   final String url;
   final String thumbnailUrl;
 
   Photo({
     required this.albumId,
-    required this.id,
+    required this.photoId,
     required this.title,
     required this.url,
     required this.thumbnailUrl,

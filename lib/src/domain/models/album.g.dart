@@ -86,6 +86,7 @@ Album _albumDeserialize(
     title: reader.readString(offsets[1]),
     userId: reader.readLong(offsets[2]),
   );
+  object.id = id;
   return object;
 }
 
@@ -116,6 +117,7 @@ List<IsarLinkBase<dynamic>> _albumGetLinks(Album object) {
 }
 
 void _albumAttach(IsarCollection<dynamic> col, Id id, Album object) {
+  object.id = id;
   object.photos.attach(col, col.isar.collection<Photo>(), r'photos', id);
 }
 

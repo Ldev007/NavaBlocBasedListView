@@ -10,8 +10,7 @@ class IsarAlbumLocalRepository implements BaseAlbumLocalRepository {
   @override
   Future<void> addAlbums({required List<Album> albums}) async {
     await IsarDb.isarDb.writeTxn(() async {
-      final oldAlbums = IsarDb.isarDb.albums;
-      await oldAlbums.putAll(albums);
+      await IsarDb.isarDb.albums.putAll(albums);
     });
   }
 

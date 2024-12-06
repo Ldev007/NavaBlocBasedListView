@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:navalistview/core/connectivity_extension.dart';
+import 'package:http/http.dart';
 import 'package:navalistview/src/presentation/common_components/shimmers/album_card_shimmer.dart';
+import 'package:navalistview/src/presentation/controller_cubits/album_controller_cubit.dart';
 import 'package:navalistview/src/presentation/controller_cubits/albums_view_controller_cubit.dart';
 import 'package:navalistview/src/presentation/controller_cubits/states/albums_view_states.dart';
 import 'package:navalistview/src/presentation/views/albums/components/album_card.dart';
@@ -24,15 +25,12 @@ class _AlbumsViewState extends State<AlbumsView> {
   @override
   void initState() {
     context.read<AlbumsViewControllerCubit>().fetchAlbums();
-    _controller.addListener(() async {
+    _controller.addListener(() {
       if (_controller.position.pixels > _controller.position.maxScrollExtent - 300) {
         final currentState = context.read<AlbumsViewControllerCubit>().state;
-        final connectivityStatus = await Connectivity().checkConnectivity();
-        if (connectivityStatus.hasInternet && mounted) {
-          if ((currentState is! AlbumsViewInitLoading && currentState is! AlbumsViewPreFetchedFromRemoteFetchingMore) ||
-              (currentState is AlbumsViewFetchedFromLocalWithoutInternet)) {
-            context.read<AlbumsViewControllerCubit>().fetchAlbums();
-          }
+        if ((currentState is! AlbumsViewInitLoading && currentState is! AlbumsViewPreFetchedFromRemoteFetchingMore) ||
+            (currentState is AlbumsViewFetchedFromLocalWithoutInternet)) {
+          context.read<AlbumsViewControllerCubit>().fetchAlbums();
         }
       }
     });
@@ -60,7 +58,14 @@ class _AlbumsViewState extends State<AlbumsView> {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => context.read<AlbumsViewControllerCubit>().refreshAlbums(),
+          onRefresh: () async {
+            final currentState = context.read<AlbumsViewControllerCubit>().state;
+            if ((currentState is! AlbumsViewInitLoading && currentState is! AlbumsViewPreFetchedFromRemoteFetchingMore) ||
+                (currentState is AlbumsViewFetchedFromLocalWithoutInternet)) {
+              return context.read<AlbumsViewControllerCubit>().refreshAlbums();
+            }
+            return;
+          },
           child: BlocBuilder<AlbumsViewControllerCubit, AlbumsViewState>(
             builder: (ctx, state) {
               if (state is AlbumsViewPreFetchedFromRemoteFetchingMore) {
@@ -68,7 +73,12 @@ class _AlbumsViewState extends State<AlbumsView> {
                   controller: _controller,
                   itemCount: state.albums.length + 1,
                   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                  itemBuilder: (ctx, i) => i == state.albums.length ? const MoreAlbumsLoadingIndicator() : AlbumCard(album: state.albums[i]),
+                  itemBuilder: (ctx, i) => i == state.albums.length
+                      ? const MoreAlbumsLoadingIndicator()
+                      : BlocProvider(
+                          create: (_) => AlbumControllerCubit(client: Client()),
+                          child: AlbumCard(album: state.albums[i]),
+                        ),
                   separatorBuilder: (context, index) => const SizedBox(height: 10),
                 );
               }
@@ -77,7 +87,10 @@ class _AlbumsViewState extends State<AlbumsView> {
                   controller: _controller,
                   itemCount: state.albums.length,
                   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                  itemBuilder: (ctx, i) => AlbumCard(album: state.albums[i]),
+                  itemBuilder: (ctx, i) => BlocProvider(
+                    create: (_) => AlbumControllerCubit(client: Client()),
+                    child: AlbumCard(album: state.albums[i]),
+                  ),
                   separatorBuilder: (context, index) => const SizedBox(height: 10),
                 );
               } else if (state is AlbumsViewError) {

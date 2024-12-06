@@ -15,7 +15,7 @@ class PhotoCard extends StatelessWidget {
         shadowColor: Colors.grey.shade600,
         child: Center(
           child: Text(
-            'P${photo.id}',
+            'P${photo.photoId}',
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
           ),
         ),

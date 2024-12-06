@@ -1,8 +1,6 @@
 import 'package:navalistview/src/domain/models/album.dart';
 
-class AlbumsViewState {
-  late final Stream<Album> albumsStream;
-}
+class AlbumsViewState {}
 
 class AlbumsViewInit extends AlbumsViewState {}
 

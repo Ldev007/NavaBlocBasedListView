@@ -21,11 +21,13 @@ class _AlbumCardState extends State<AlbumCard> {
   @override
   void initState() {
     context.read<AlbumControllerCubit>().fetchPhotosForAlbum(albumId: widget.album.albumId);
-    _listController.addListener(() {
-      if (_listController.position.pixels > _listController.position.maxScrollExtent - 200 &&
-          context.read<AlbumControllerCubit>().state is! AlbumInitLoading &&
-          context.read<AlbumControllerCubit>().state is! AlbumLoadedLoading) {
-        context.read<AlbumControllerCubit>().fetchPhotosForAlbum(albumId: widget.album.albumId);
+    _listController.addListener(() async {
+      if (_listController.position.pixels > _listController.position.maxScrollExtent - 200) {
+        final currentState = context.read<AlbumControllerCubit>().state;
+        if ((currentState is! AlbumInitFetching && currentState is! AlbumPreFetchedFromRemoteFetchingMore) ||
+            (currentState is AlbumFetchedFromLocalWithoutInternet)) {
+          context.read<AlbumControllerCubit>().fetchPhotosForAlbum(albumId: widget.album.albumId);
+        }
       }
     });
     super.initState();
@@ -52,18 +54,7 @@ class _AlbumCardState extends State<AlbumCard> {
               Expanded(
                 child: BlocBuilder<AlbumControllerCubit, AlbumState>(
                   builder: (ctx, state) {
-                    if (state is AlbumInit) {
-                      return const Center(child: Text('No photos added'));
-                    }
-                    if (state is AlbumInitLoading) {
-                      return ListView(
-                        children: List.generate(
-                          (MediaQuery.of(context).size.width) ~/ (MediaQuery.of(context).size.width * 0.25),
-                          (i) => const PhotoCardShimmer(),
-                        ),
-                      );
-                    }
-                    if (state is AlbumLoadedLoading) {
+                    if (state is AlbumPreFetchedFromRemoteFetchingMore) {
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
                         controller: _listController,
@@ -71,17 +62,28 @@ class _AlbumCardState extends State<AlbumCard> {
                         itemBuilder: (ctx, i) => i == state.photos.length ? const MorePhotosLoadingIndicator() : PhotoCard(photo: state.photos[i]),
                       );
                     }
-                    if (state is AlbumLoaded) {
+
+                    if (state is AlbumFetched) {
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
                         controller: _listController,
                         itemCount: state.photos.length,
                         itemBuilder: (ctx, i) => PhotoCard(photo: state.photos[i]),
                       );
+                    } else if (state is AlbumError) {
+                      return Center(
+                        child: Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                        ),
+                      );
                     }
 
-                    return const Center(
-                      child: Text('Something went wrong, please refresh the page or try again later'),
+                    return ListView(
+                      children: List.generate(
+                        (MediaQuery.of(context).size.width) ~/ (MediaQuery.of(context).size.width * 0.25),
+                        (i) => const PhotoCardShimmer(),
+                      ),
                     );
                   },
                 ),

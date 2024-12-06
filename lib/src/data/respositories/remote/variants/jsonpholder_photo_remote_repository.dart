@@ -12,7 +12,7 @@ class JsonpholderPhotoRemoteRepository implements BasePhotoRemoteRepository {
 
   @override
   Future<List<Photo>> fetchPhotosInAlbum({required int albumId}) async {
-    final response = await client.get(Uri.parse('$baseUrl${RestEndpoints.photos}/?_limit=$limit'));
+    final response = await client.get(Uri.parse('$baseUrl${RestEndpoints.photos}/?_limit=$limit&albumId=$albumId'));
     final List<Photo> photos = [];
 
     if (response.statusCode == 200) {

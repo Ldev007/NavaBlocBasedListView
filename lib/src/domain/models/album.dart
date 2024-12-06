@@ -5,11 +5,11 @@ import 'package:navalistview/src/domain/models/photo.dart';
 part 'album.g.dart';
 
 @JsonSerializable()
-@Collection()
+@collection
 @Name('Albums')
 class Album {
   @JsonKey(includeFromJson: false, includeToJson: false, includeIfNull: false)
-  final Id id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   final int userId;
   @JsonKey(name: 'id')
