@@ -11,6 +11,7 @@ environment:
   sdk: ^3.5.3
 
 dependencies:
+  connectivity_plus: ^6.1.0
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
@@ -20,9 +21,11 @@ dependencies:
   isar: 3.0.2
   isar_flutter_libs: 3.0.2
   json_annotation: ^4.9.0
+  path_provider: ^2.1.5
   shimmer: ^3.0.0
 
 dev_dependencies:
+  bloc_test: ^9.1.7
   build_runner: ^2.4.13
   flutter_lints: ^4.0.0
   flutter_test:

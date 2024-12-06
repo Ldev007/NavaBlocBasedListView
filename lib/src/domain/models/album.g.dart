@@ -17,13 +17,18 @@ const AlbumSchema = CollectionSchema(
   name: r'Albums',
   id: 3797381526277860700,
   properties: {
-    r'title': PropertySchema(
+    r'albumId': PropertySchema(
       id: 0,
+      name: r'albumId',
+      type: IsarType.long,
+    ),
+    r'title': PropertySchema(
+      id: 1,
       name: r'title',
       type: IsarType.string,
     ),
     r'userId': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'userId',
       type: IsarType.long,
     )
@@ -65,8 +70,9 @@ void _albumSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.title);
-  writer.writeLong(offsets[1], object.userId);
+  writer.writeLong(offsets[0], object.albumId);
+  writer.writeString(offsets[1], object.title);
+  writer.writeLong(offsets[2], object.userId);
 }
 
 Album _albumDeserialize(
@@ -76,9 +82,9 @@ Album _albumDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Album(
-    id: id,
-    title: reader.readString(offsets[0]),
-    userId: reader.readLong(offsets[1]),
+    albumId: reader.readLong(offsets[0]),
+    title: reader.readString(offsets[1]),
+    userId: reader.readLong(offsets[2]),
   );
   return object;
 }
@@ -91,8 +97,10 @@ P _albumDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -187,6 +195,58 @@ extension AlbumQueryWhere on QueryBuilder<Album, Album, QWhereClause> {
 }
 
 extension AlbumQueryFilter on QueryBuilder<Album, Album, QFilterCondition> {
+  QueryBuilder<Album, Album, QAfterFilterCondition> albumIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'albumId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> albumIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'albumId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> albumIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'albumId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> albumIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'albumId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Album, Album, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -481,6 +541,18 @@ extension AlbumQueryLinks on QueryBuilder<Album, Album, QFilterCondition> {
 }
 
 extension AlbumQuerySortBy on QueryBuilder<Album, Album, QSortBy> {
+  QueryBuilder<Album, Album, QAfterSortBy> sortByAlbumId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'albumId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterSortBy> sortByAlbumIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'albumId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Album, Album, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -507,6 +579,18 @@ extension AlbumQuerySortBy on QueryBuilder<Album, Album, QSortBy> {
 }
 
 extension AlbumQuerySortThenBy on QueryBuilder<Album, Album, QSortThenBy> {
+  QueryBuilder<Album, Album, QAfterSortBy> thenByAlbumId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'albumId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterSortBy> thenByAlbumIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'albumId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Album, Album, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -545,6 +629,12 @@ extension AlbumQuerySortThenBy on QueryBuilder<Album, Album, QSortThenBy> {
 }
 
 extension AlbumQueryWhereDistinct on QueryBuilder<Album, Album, QDistinct> {
+  QueryBuilder<Album, Album, QDistinct> distinctByAlbumId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'albumId');
+    });
+  }
+
   QueryBuilder<Album, Album, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -563,6 +653,12 @@ extension AlbumQueryProperty on QueryBuilder<Album, Album, QQueryProperty> {
   QueryBuilder<Album, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Album, int, QQueryOperations> albumIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'albumId');
     });
   }
 
@@ -585,12 +681,12 @@ extension AlbumQueryProperty on QueryBuilder<Album, Album, QQueryProperty> {
 
 Album _$AlbumFromJson(Map<String, dynamic> json) => Album(
       userId: (json['userId'] as num).toInt(),
-      id: (json['id'] as num).toInt(),
+      albumId: (json['id'] as num).toInt(),
       title: json['title'] as String,
     );
 
 Map<String, dynamic> _$AlbumToJson(Album instance) => <String, dynamic>{
       'userId': instance.userId,
-      'id': instance.id,
+      'id': instance.albumId,
       'title': instance.title,
     };

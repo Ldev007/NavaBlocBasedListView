@@ -1,5 +1,7 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart';
 import 'package:navalistview/src/presentation/controller_cubits/album_controller_cubit.dart';
 import 'package:navalistview/src/presentation/controller_cubits/albums_view_controller_cubit.dart';
 import 'package:navalistview/src/presentation/views/albums/albums_view.dart';
@@ -16,7 +18,7 @@ class NavaBlocBasedListView extends StatelessWidget {
       home: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => AlbumsViewControllerCubit(),
+            create: (context) => AlbumsViewControllerCubit(connectivityClient: Connectivity(), client: Client()),
           ),
           BlocProvider(
             create: (context) => AlbumControllerCubit(),

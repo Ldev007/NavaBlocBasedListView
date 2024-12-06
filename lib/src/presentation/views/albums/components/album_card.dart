@@ -20,12 +20,12 @@ class _AlbumCardState extends State<AlbumCard> {
   final ScrollController _listController = ScrollController();
   @override
   void initState() {
-    context.read<AlbumControllerCubit>().fetchPhotosForAlbum(albumId: widget.album.id);
+    context.read<AlbumControllerCubit>().fetchPhotosForAlbum(albumId: widget.album.albumId);
     _listController.addListener(() {
       if (_listController.position.pixels > _listController.position.maxScrollExtent - 200 &&
           context.read<AlbumControllerCubit>().state is! AlbumInitLoading &&
           context.read<AlbumControllerCubit>().state is! AlbumLoadedLoading) {
-        context.read<AlbumControllerCubit>().fetchPhotosForAlbum(albumId: widget.album.id);
+        context.read<AlbumControllerCubit>().fetchPhotosForAlbum(albumId: widget.album.albumId);
       }
     });
     super.initState();

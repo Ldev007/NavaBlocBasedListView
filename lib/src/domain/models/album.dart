@@ -8,12 +8,16 @@ part 'album.g.dart';
 @Collection()
 @Name('Albums')
 class Album {
+  @JsonKey(includeFromJson: false, includeToJson: false, includeIfNull: false)
+  final Id id = Isar.autoIncrement;
+
   final int userId;
-  final Id id;
+  @JsonKey(name: 'id')
+  final int albumId;
   final String title;
   final photos = IsarLinks<Photo>();
 
-  Album({required this.userId, required this.id, required this.title});
+  Album({required this.userId, required this.albumId, required this.title});
 
   factory Album.fromJson(Map<String, dynamic> json) => _$AlbumFromJson(json);
 

@@ -1,21 +1,41 @@
 import 'package:navalistview/src/domain/models/album.dart';
 
-class AlbumsViewState {}
+class AlbumsViewState {
+  late final Stream<Album> albumsStream;
+}
 
 class AlbumsViewInit extends AlbumsViewState {}
 
 class AlbumsViewInitLoading extends AlbumsViewState {}
 
-class AlbumsViewLoadedLoading extends AlbumsViewState {
+class AlbumsViewPreFetchedFromRemoteFetchingMore extends AlbumsViewState {
   final List<Album> albums;
 
-  AlbumsViewLoadedLoading({required this.albums});
+  AlbumsViewPreFetchedFromRemoteFetchingMore({required this.albums});
 }
 
-class AlbumsViewLoaded extends AlbumsViewState {
+class AlbumsViewFetched extends AlbumsViewState {
   final List<Album> albums;
 
-  AlbumsViewLoaded({required this.albums});
+  AlbumsViewFetched({required this.albums});
+}
+
+// states wrt remote
+class AlbumsViewFetchedFromRemote extends AlbumsViewFetched {
+  AlbumsViewFetchedFromRemote({required super.albums});
+}
+
+// states wrt local
+class AlbumsViewFetchedFromLocalWithoutInternet extends AlbumsViewFetched {
+  AlbumsViewFetchedFromLocalWithoutInternet({required super.albums});
+}
+
+class AlbumsViewFetchedFromLocalInit extends AlbumsViewFetched {
+  AlbumsViewFetchedFromLocalInit({required super.albums});
+}
+
+class AlbumsViewFetchedFromLocalOnRefresh extends AlbumsViewFetched {
+  AlbumsViewFetchedFromLocalOnRefresh({required super.albums});
 }
 
 class AlbumsViewError extends AlbumsViewState {
