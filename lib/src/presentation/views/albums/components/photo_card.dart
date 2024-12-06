@@ -8,8 +8,18 @@ class PhotoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Image.network(photo.url),
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.25,
+      child: Card(
+        elevation: 2,
+        shadowColor: Colors.grey.shade600,
+        child: Center(
+          child: Text(
+            'P${photo.id}',
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -71,7 +71,9 @@ class _AlbumsViewState extends State<AlbumsView> {
                   separatorBuilder: (context, index) => const SizedBox(height: 10),
                 );
               } else {
-                return const Placeholder();
+                return const Center(
+                  child: Text('Please refresh or try again later'),
+                );
               }
             },
           ),

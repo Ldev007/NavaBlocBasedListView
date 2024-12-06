@@ -1,3 +1,5 @@
+import 'package:navalistview/src/domain/models/photo.dart';
+
 abstract class BasePhotoRemoteRepository {
-  Future<void> fetchPhotosInAlbum({required String albumId});
+  Future<List<Photo>> fetchPhotosInAlbum({required int albumId});
 }
