@@ -85,7 +85,11 @@ class _AlbumsViewState extends State<AlbumsView> {
                   child: SizedBox(
                     height: MediaQuery.of(context).size.height - kBottomNavigationBarHeight,
                     width: double.infinity,
-                    child: Center(child: Text(state.message)),
+                    child: Center(
+                        child: Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                    )),
                   ),
                 );
               }
